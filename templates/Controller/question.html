@@ -1,0 +1,430 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Exam Questions</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      color: #000;
+      text-align: center;
+      padding: 30px;
+      margin: 0;
+    }
+
+    .question-container {
+      display: none;
+      background-color: #ffffff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 600px;
+      margin: 0 auto 20px;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      margin: 20px 0;
+      opacity: 1;
+      transition: opacity 1s ease;
+    }
+
+    .fade-out {
+      opacity: 0;
+    }
+
+    #optionsContainer {
+      display: none;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    .fade-in {
+      display: block !important;
+      opacity: 1 !important;
+    }
+
+    input[type="radio"] {
+      margin: 10px;
+    }
+
+    #nextBtn {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      display: block;
+      margin: 20px auto;
+    }
+
+    #timer {
+      font-size: 18px;
+      margin-top: 10px;
+      color: #333;
+    }
+
+    .error {
+      color: red;
+      font-size: 14px;
+      display: none;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Exam Questions</h1>
+
+  <div id="questionContainer" class="question-container">
+    <img id="questionImage" src="" alt="question image">
+    <div id="optionsContainer"></div>
+    <div id="timer">Time: 0 ms</div>
+    <div id="error" class="error">Please select an option to proceed.</div>
+  </div>
+
+  <button id="nextBtn" disabled>Next</button>
+
+  {{ data|json_script:"question-data" }}
+
+  <script>
+    const questionData = JSON.parse(document.getElementById("question-data").textContent);
+    let currentIndex = 0;
+    let responseTimes = [];
+
+    let startTime = 0;
+    let animationFrameId;
+    let delayTimeout;
+
+    const questionContainer = document.getElementById('questionContainer');
+    const questionImage = document.getElementById('questionImage');
+    const optionsContainer = document.getElementById('optionsContainer');
+    const nextBtn = document.getElementById('nextBtn');
+    const timerDisplay = document.getElementById('timer');
+    const errorMsg = document.getElementById('error');
+
+    function startTimer() {
+      startTime = performance.now();
+      updateTimer();
+    }
+
+    function updateTimer() {
+      const elapsed = performance.now() - startTime;
+      timerDisplay.textContent = `Time: ${elapsed.toFixed(0)} ms`;
+      animationFrameId = requestAnimationFrame(updateTimer);
+    }
+
+    function stopTimer() {
+      cancelAnimationFrame(animationFrameId);
+      const elapsed = performance.now() - startTime;
+      return elapsed.toFixed(0);
+    }
+
+    function showQuestion(index) {
+      const question = questionData[index];
+      if (!question) return;
+
+      errorMsg.style.display = 'none';
+      questionImage.src = question.image;
+      questionImage.classList.remove("fade-out");
+      questionImage.style.display = 'block';
+      optionsContainer.innerHTML = '';
+      optionsContainer.classList.remove("fade-in");
+      optionsContainer.style.display = 'none';
+      nextBtn.disabled = true;
+
+      question.options.forEach((opt) => {
+        const label = document.createElement('label');
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = 'option';
+        radio.value = opt;
+        label.appendChild(radio);
+        label.appendChild(document.createTextNode(" " + opt));
+        optionsContainer.appendChild(label);
+        optionsContainer.appendChild(document.createElement('br'));
+      });
+
+      questionContainer.style.display = 'block';
+
+      delayTimeout = setTimeout(() => {
+        questionImage.classList.add("fade-out");
+
+        setTimeout(() => {
+          questionImage.style.display = 'none';
+          optionsContainer.classList.add("fade-in");
+          nextBtn.disabled = false;
+          startTimer(); // start timer after options are shown
+        }, 1000); // match image fade-out time
+      }, 5000);
+    }
+
+    nextBtn.addEventListener('click', () => {
+      const selected = document.querySelector('input[name="option"]:checked');
+      if (!selected) {
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      errorMsg.style.display = 'none';
+      const timeTaken = stopTimer();
+      responseTimes.push(`${timeTaken} ms`);
+
+      cancelAnimationFrame(animationFrameId);
+      clearTimeout(delayTimeout);
+
+      questionImage.style.display = 'block';
+      questionImage.classList.remove("fade-out");
+      optionsContainer.classList.remove("fade-in");
+
+      if (currentIndex < questionData.length) {
+        showQuestion(currentIndex);
+        currentIndex++;
+      } else {
+        questionContainer.innerHTML = `<h2>No more questions</h2><p>Response times: ${responseTimes.join(', ')}</p>`;
+        nextBtn.style.display = "none";
+      }
+    });
+
+    // Start first question
+    showQuestion(currentIndex);
+    currentIndex++;
+  </script>
+
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Exam Questions</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      color: #000;
+      text-align: center;
+      padding: 30px;
+      margin: 0;
+    }
+
+    .question-container {
+      display: none;
+      background-color: #ffffff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 600px;
+      margin: 0 auto 20px;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      margin: 20px 0;
+      opacity: 1;
+      transition: opacity 1s ease;
+    }
+
+    .fade-out {
+      opacity: 0;
+    }
+
+    #optionsContainer {
+      display: none;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    .fade-in {
+      display: block !important;
+      opacity: 1 !important;
+    }
+
+    input[type="radio"] {
+      margin: 10px;
+    }
+
+    #nextBtn {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      display: block;
+      margin: 20px auto;
+    }
+
+    #timer {
+      font-size: 18px;
+      margin-top: 10px;
+      color: #333;
+    }
+
+    .error {
+      color: red;
+      font-size: 14px;
+      display: none;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body data-user-id="{{ user_id }}">
+  <h1>Exam Questions</h1>
+
+  <div id="questionContainer" class="question-container">
+    <img id="questionImage" src="" alt="question image">
+    <div id="optionsContainer"></div>
+    <div id="timer">Time: 0 ms</div>
+    <div id="error" class="error">Please select an option to proceed.</div>
+  </div>
+
+  <button id="nextBtn" disabled>Next</button>
+
+  {{ data|json_script:"question-data" }}
+
+  <script>
+    const questionData = JSON.parse(document.getElementById("question-data").textContent);
+    const userId = document.body.dataset.userId;
+
+    let currentIndex = 0;
+    let responseTimes = [];
+
+    let startTime = 0;
+    let animationFrameId;
+    let delayTimeout;
+
+    const questionContainer = document.getElementById('questionContainer');
+    const questionImage = document.getElementById('questionImage');
+    const optionsContainer = document.getElementById('optionsContainer');
+    const nextBtn = document.getElementById('nextBtn');
+    const timerDisplay = document.getElementById('timer');
+    const errorMsg = document.getElementById('error');
+
+    function startTimer() {
+      startTime = performance.now();
+      updateTimer();
+    }
+
+    function updateTimer() {
+      const elapsed = performance.now() - startTime;
+      timerDisplay.textContent = `Time: ${elapsed.toFixed(0)} ms`;
+      animationFrameId = requestAnimationFrame(updateTimer);
+    }
+
+    function stopTimer() {
+      cancelAnimationFrame(animationFrameId);
+      const elapsed = performance.now() - startTime;
+      return elapsed.toFixed(0);
+    }
+
+    function showQuestion(index) {
+      const question = questionData[index];
+      if (!question) return;
+
+      errorMsg.style.display = 'none';
+      questionImage.src = question.image;
+      questionImage.classList.remove("fade-out");
+      questionImage.style.display = 'block';
+      optionsContainer.innerHTML = '';
+      optionsContainer.classList.remove("fade-in");
+      optionsContainer.style.display = 'none';
+      nextBtn.disabled = true;
+
+      question.options.forEach((opt) => {
+        const label = document.createElement('label');
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = 'option';
+        radio.value = opt;
+        label.appendChild(radio);
+        label.appendChild(document.createTextNode(" " + opt));
+        optionsContainer.appendChild(label);
+        optionsContainer.appendChild(document.createElement('br'));
+      });
+
+      questionContainer.style.display = 'block';
+
+      delayTimeout = setTimeout(() => {
+        questionImage.classList.add("fade-out");
+        setTimeout(() => {
+          questionImage.style.display = 'none';
+          optionsContainer.classList.add("fade-in");
+          nextBtn.disabled = false;
+          startTimer(); // Timer starts when options are shown
+        }, 1000); // after fade
+      }, 5000); // wait 5 seconds
+    }
+
+    function getCSRFToken() {
+      const name = "csrftoken=";
+      const cookies = document.cookie.split(';');
+      for (let cookie of cookies) {
+        cookie = cookie.trim();
+        if (cookie.startsWith(name)) {
+          return cookie.substring(name.length);
+        }
+      }
+      return "";
+    }
+
+    nextBtn.addEventListener('click', () => {
+      const selected = document.querySelector('input[name="option"]:checked');
+      if (!selected) {
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      errorMsg.style.display = 'none';
+      const timeTaken = stopTimer();
+      const selectedAnswer = selected.value;
+      const currentQuestion = questionData[currentIndex - 1]; // the question just shown
+
+      // Send result to backend
+      fetch('/api/submit-result/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({
+          USERID: userId,
+          QUESTIONID: currentQuestion.id,
+          selected_answer: selectedAnswer,
+          response_time: timeTaken
+        })
+      }).then(res => res.json())
+        .then(data => {
+          console.log("Saved:", data);
+        }).catch(err => {
+          console.error("Save failed:", err);
+        });
+
+      responseTimes.push(`${timeTaken} ms`);
+
+      cancelAnimationFrame(animationFrameId);
+      clearTimeout(delayTimeout);
+
+      questionImage.style.display = 'block';
+      questionImage.classList.remove("fade-out");
+      optionsContainer.classList.remove("fade-in");
+
+      if (currentIndex < questionData.length) {
+        showQuestion(currentIndex);
+        currentIndex++;
+      } else {
+        questionContainer.innerHTML = `<h2>No more questions</h2><p>Response times: ${responseTimes.join(', ')}</p>`;
+        nextBtn.style.display = "none";
+      }
+    });
+
+    // Start the first question
+    showQuestion(currentIndex);
+    currentIndex++;
+  </script>
+
+</body>
+</html>

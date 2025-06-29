@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #141e30, #243b55);
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background-color: #111;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #FFD700;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    }
+
+    .navbar h2 {
+      color: #FFD700;
+      font-size: 24px;
+      letter-spacing: 1px;
+    }
+
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      margin-left: 25px;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #FFD700;
+    }
+
+    .main {
+      padding: 40px 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .section-title {
+      font-size: 2rem;
+      margin-bottom: 30px;
+      color: #FFD700;
+      text-align: center;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      border-radius: 16px;
+      padding: 30px 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
+      background: rgba(255, 215, 0, 0.1);
+    }
+
+    .card i {
+      font-size: 2.8rem;
+      color: #FFD700;
+      margin-bottom: 15px;
+    }
+
+    .card h3 {
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      font-size: 0.95rem;
+      color: #ccc;
+    }
+
+    .details-section {
+      margin-top: 50px;
+    }
+
+    .details-box {
+      background: rgba(255, 255, 255, 0.04);
+      border-left: 4px solid #FFD700;
+      padding: 25px 30px;
+      margin-bottom: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
+    }
+
+    .details-box h4 {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      color: #FFD700;
+    }
+
+    .details-box ul {
+      list-style: none;
+      padding-left: 15px;
+    }
+
+    .details-box ul li {
+      margin-bottom: 10px;
+      position: relative;
+      padding-left: 20px;
+      color: #ddd;
+    }
+
+    .details-box ul li::before {
+      content: "✔";
+      color: #FFD700;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    @media (max-width: 600px) {
+      .navbar h2 {
+        font-size: 20px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .card {
+        padding: 25px 15px;
+      }
+
+      .details-box {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <div class="navbar">
+    <h2>Admin Panel</h2>
+    <div class="nav-links">
+      <a href="/manageuser">Users</a>
+      <a href="/manageinst">Instructions</a>
+      <a href="/managequest">Manage Questions</a>
+      <a href="/appeared">Appeared Patients</a>
+      <a href="/contappeared">Appeared Controller</a>
+      <a href="/logout">Logout</a>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <h1 class="section-title">Welcome Admin 👋</h1>
+    <div class="cards">
+      <div class="card" id="users"  onclick="window.location='/manageuser'">
+        <i class="fas fa-users"></i>
+        <h3>Users</h3>
+        <p>View, add, and manage user accounts across the platform.</p>
+      </div>
+      <div class="card" id="questions" onclick="window.location='/managequest'">
+        <i class="fas fa-question-circle"></i>
+        <h3>Manage Questions</h3>
+        <p>Create, review, or modify exam questions and track performance.</p>
+      </div>
+    </div>
+
+    <!-- Detailed Sections -->
+    <div class="details-section">
+
+      <!-- Users Overview -->
+      <div class="details-box">
+        <h4>User Overview</h4>
+        <ul>
+          <li>Currently Active Users: <strong>125</strong></li>
+          <li>New Registrations Today: <strong>8</strong></li>
+          <li>Pending Approvals: <strong>3</strong></li>
+          <li>Deactivated Accounts: <strong>2</strong></li>
+        </ul>
+      </div>
+
+      <!-- Questions Overview -->
+      <div class="details-box">
+        <h4>Question Management</h4>
+        <ul>
+          <li>Total Questions Created: <strong>{{c}}</strong></li>
+          <li>Subjects Covered: <strong>12</strong></li>
+          <li>Recently Updated Questions: <strong>5</strong></li>
+          <li>Review Pending Questions: <strong>4</strong></li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

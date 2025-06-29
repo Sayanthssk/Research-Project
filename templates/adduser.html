@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add User</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #232526, #414345);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    .form-container {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+      width: 100%;
+      max-width: 700px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #FFD700;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin-top: 18px;
+      font-weight: 500;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #999;
+      border-radius: 5px;
+      font-size: 1rem;
+      margin-top: 5px;
+    }
+
+    input[type="file"] {
+      color: #fff;
+    }
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      margin-top: 15px;
+    }
+
+    .checkbox input {
+      margin-right: 10px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #FFD700;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      margin-top: 25px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #ffe75d;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <h2>Register User - Hospital Intake</h2>
+    <form  method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <label for="abbreviation">1. Name in Abbreviation</label>
+      <input type="text" id="abbreviation" name="abbreviation" required>
+
+      <label for="age">2. Age</label>
+      <input type="number" id="age" name="age" required>
+
+      <label for="gender">3. Gender</label>
+      <select id="gender" name="gender" required>
+        <option value="">-- Select Gender --</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Transgender">Transgender</option>
+        <option value="Not Specified">Choose not to reveal</option>
+      </select>
+
+      <label for="cancer_type">4. Type of Cancer Diagnosed</label>
+      <input type="text" id="cancer_type" name="cancer_type" required>
+
+      <label for="cancer_stage">5. Cancer Stage</label>
+      <input type="text" id="cancer_stage" name="cancer_stage" required>
+
+      <label for="treatment">6. Type of Treatment Received</label>
+      <input type="text" id="treatment" name="treatment" required>
+
+      
+
+
+      <label for="role">User Role</label>
+      <select id="role" name="role" required>
+        <option value="">-- Select Role --</option>
+        <option value="controller">Controller</option>
+        <option value="patient">Patient</option>
+      </select>
+
+      <label for="profile">Profile Image</label>
+      <input type="file" id="profile" name="profile" accept="image/*">
+
+      <label for="profile">Password</label>
+      <input type="text" id="profile" name="password" accept="image/*">
+
+      <button type="submit">Register</button>
+    </form>
+  </div>
+
+</body>
+</html>

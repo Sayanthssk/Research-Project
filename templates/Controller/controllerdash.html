@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controller Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            color: #333;
+        }
+
+        .dashboard {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            background-color: #fff;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .data-section {
+            margin-bottom: 30px;
+        }
+
+        .data-section p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        .start-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .start-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <h1>User Dashboard</h1>
+
+        <div class="data-section">
+            <p><strong>Total Tests Scheduled:</strong> 25</p>
+            <p><strong>Tests Completed:</strong> 19</p>
+            <p><strong>Pending Reviews:</strong> 4</p>
+            <p><strong>System Status:</strong> All Systems Operational</p>
+        </div>
+
+        <button class="start-btn" onclick="window.location='/instruction'">Start Test</button>
+
+        <div class="footer">
+            Crafted with pride, signed with respect.
+        </div>
+    </div>
+</body>
+</html>

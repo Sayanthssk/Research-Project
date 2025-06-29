@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attended User Status</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    *::-webkit-scrollbar{
+      display: none;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #232526, #414345);
+      color: #fff;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #FFD700;
+      margin-bottom: 30px;
+    }
+
+    .table-container {
+      max-width: 100%;
+      overflow-x: auto;
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid #555;
+      font-size: 0.85rem;
+    }
+
+    th, td {
+      padding: 8px;
+      border: 1px solid #666;
+      text-align: center;
+      color: #fff;
+    }
+
+    th {
+      background-color: #FFD700;
+      color: #000;
+    }
+
+    .correct {
+      color: lime;
+      font-weight: bold;
+    }
+
+    .wrong {
+      color: red;
+      font-weight: bold;
+    }
+
+    .download-btn {
+      background: #FFD700;
+      color: #000;
+      padding: 10px 20px;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      display: block;
+      margin: 20px auto;
+    }
+
+    .download-btn:hover {
+      background: #ffe75d;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Attended Patient - Question Status with Response Time</h1>
+
+  <div class="table-container">
+    <table id="statusTable">
+  <thead>
+    <tr>
+      <th rowspan="2">Patient Name</th>
+      <th colspan="2">Q1</th>
+      <th colspan="2">Q2</th>
+      <th colspan="2">Q3</th>
+      <th colspan="2">Q4</th>
+      <th colspan="2">Q5</th>
+      <th colspan="2">Q6</th>
+      <th colspan="2">Q7</th>
+      <th colspan="2">Q8</th>
+      <th colspan="2">Q9</th>
+      <th colspan="2">Q10</th>
+      <th rowspan="2">Total Correct</th>
+    </tr>
+    <tr>
+      <th>Answer</th><th>Time</th>
+      <th>Answer</th><th>Time</th>
+      <th>Answer</th><th>Time</th>
+      <th>Answer</th><th>Time</th>
+      <th>Answer</th><th>Time</th>
+      <th>Answer</th><th>Time</th>
+      <th>Answer</th><th>Time</th>
+      <th>Answer</th><th>Time</th>
+      <th>Answer</th><th>Time</th>
+      <th>Answer</th><th>Time</th>
+    </tr>
+      </thead>
+    <tbody>
+{% for row in rows %}
+  <tr>
+      <td>{{ row.user.abbreviation }}</td>
+      {% for result in row.results %}
+          {% if result %}
+  <td class="{% if result.is_correct %}correct{% else %}wrong{% endif %}">
+    {% if result.is_correct %}1{% else %}0{% endif %}
+  </td>
+  <td>{{ result.response_time }}ms</td>
+{% else %}
+  <td>-</td><td>-</td>
+{% endif %}
+      {% endfor %}
+      <td>{{ row.total_correct }}</td>
+  </tr>
+{% endfor %}
+</tbody>
+
+    </table>
+  </div>
+
+  <button class="download-btn" onclick="downloadExcel()">⬇ Download Excel</button>
+
+  <script>
+    function downloadExcel() {
+      const table = document.getElementById("statusTable");
+      const workbook = XLSX.utils.table_to_book(table, { sheet: "UserStatus" });
+      XLSX.writeFile(workbook, "Patient.xlsx");
+    }
+  </script>
+
+</body>
+</html>
