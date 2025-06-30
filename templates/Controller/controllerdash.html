@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -77,5 +77,128 @@
             Crafted with pride, signed with respect.
         </div>
     </div>
+</body>
+</html> -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Psychological Tool for Cognitive Measurement</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      color: #000;
+    }
+
+    .header {
+      background: linear-gradient(to bottom, #c6e2f3, #ffffff);
+      padding: 15px 0;
+      border-bottom: 4px solid #12659c;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: center;
+      background-color: #12659c;
+      padding: 8px 0;
+    }
+
+    .nav a {
+      color: white;
+      text-decoration: none;
+      padding: 8px 20px;
+      font-weight: bold;
+      border-right: 1px solid white;
+    }
+
+    .nav a:last-child {
+      border-right: none;
+    }
+
+    .nav a:hover {
+      background-color: #0a4d7b;
+    }
+
+    .content {
+      padding: 20px 40px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+
+    p {
+      font-size: 15px;
+      line-height: 1.6;
+      text-align: justify;
+    }
+
+    .footer {
+      margin-top: 40px;
+      padding: 10px;
+      background-color: #f2f2f2;
+      text-align: center;
+      font-size: 13px;
+      color: #555;
+      border-top: 1px solid #ddd;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #12659c;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <img src="{% static 'images/psychology.jpg' %}" style="height: 80px;" alt="Psychology Logo">
+    <div class="title">Psychological Tool for Cognitive Measurement</div>
+  </div>
+
+  <div class="nav">
+    <a href="/controllerdash">Home</a>
+    <a href="/logout">Logout</a>
+  </div>
+
+  <div class="content">
+    <h2>INTRODUCTION</h2>
+    <p>
+      Modern trends have predicted that knowledge of different languages will facilitate the cognitive development of human beings. As a consequence, many cognitive measures are used to gain the goal of a research through software.
+    </p>
+    <p>
+      The software is developed keeping in mind the future prospect of tribal people of Odisha. By using this we can measure the visual word perception in terms of Recognition Accuracy and Response Latency of Santali and Odia bilinguals. Contemporary studies reflect that tribal languages are at the verge of extinction as they are not widely used.
+    </p>
+    <p>
+      Two different sets of experiments are administered by using this computer-based software: Group (1) Santali mother tongue and Odia second language, (2) Odia mother tongue and Santali second language. The software is administered in original script and roman script in both languages. Accordingly, the input materials of the software are presented in Santali (Ol Chiki), Odia and Roman script (English). This is user-friendly software. The output of the test is accessible in textual as well as graphical format.
+    </p>
+    <p>
+      Moreover, the software also measures whether the words that are presented unilaterally and bilaterally. Emotional and Neutral words of both languages (Odia and Santali) are used in a randomized order in both experiments. All the participants are tested individually. They are instructed to press the keys to record their responses for further statistical analysis.
+    </p>
+    <a class="btn" href="/instruction">Start Test</a>
+  </div>
+
+  <div class="footer">
+    Copyright 2015 All Rights Reserved.
+  </div>
+
 </body>
 </html>

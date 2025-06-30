@@ -40,7 +40,7 @@
       margin-top: 30px;
       padding: 12px 25px;
       font-size: 16px;
-      background-color: #28a745;
+      background-color: #12659c;
       color: white;
       border: none;
       border-radius: 6px;
@@ -49,17 +49,19 @@
     }
 
     .continue-btn:hover {
-      background-color: #218838;
+      background-color: #12659c;
     }
 
     .cross-mark {
-      display: none;
-      font-size: 120px;
-      color: red;
-      text-align: center;
-      margin-top: 20vh;
-      animation: fadeInOut 5s ease;
-    }
+    display: none;
+    font-size: 120px;
+    color: black;
+    text-align: center;
+    margin-top: 20vh;
+    animation: fadeInOut 5s ease;
+    font-weight: bold;
+  }
+
 
     @keyframes fadeInOut {
       0% { opacity: 0; }
@@ -78,18 +80,18 @@
     <button class="continue-btn" onclick="startTest()">Continue</button>
   </div>
 
-  <div class="cross-mark" id="crossMark">&#10060;</div>
+  <div class="cross-mark" id="crossMark">+</div>
 
   <script>
     function startTest() {
       document.getElementById('instructionBox').style.display = 'none';
 
       const cross = document.getElementById('crossMark');
-      cross.style.display = 'block';
+      cross.style.display = 'none';
 
       setTimeout(() => {
         window.location.href = "/exam/question/"; 
-      }, 5000);
+      }, 500);
     }
   </script>
 </body>
