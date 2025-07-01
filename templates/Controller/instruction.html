@@ -77,22 +77,10 @@
       <h1>{{ i.title }}</h1>
       <h2>{{ i.content }}</h2>
     {% endfor %}
-    <button class="continue-btn" onclick="startTest()">Continue</button>
+    <button class="continue-btn" onclick="window.location.href = '/exam/question/'">Continue</button>
   </div>
 
-  <div class="cross-mark" id="crossMark">+</div>
 
-  <script>
-    function startTest() {
-      document.getElementById('instructionBox').style.display = 'none';
 
-      const cross = document.getElementById('crossMark');
-      cross.style.display = 'none';
-
-      setTimeout(() => {
-        window.location.href = "/exam/question/"; 
-      }, 500);
-    }
-  </script>
 </body>
 </html>
