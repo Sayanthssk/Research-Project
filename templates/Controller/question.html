@@ -1387,8 +1387,8 @@
         setTimeout(() => {
           plusMark.style.display = "none";
           callback();
-        }, 500); // Allow fade-out to complete
-      }, 500); // Show fixation for 500ms
+        }, 500); 
+      }, 500); 
     }
 
     function showQuestion(index) {
@@ -1404,7 +1404,7 @@
       nextBtn.style.display = 'none';
       optionsContainer.innerHTML = '';
 
-      // Show fixation point and proceed
+     
       plusMark.style.display = "block";
       showFixation(() => {
         questionImage.src = question.image;
@@ -1504,4 +1504,4 @@
     currentIndex++;
   </script>
 </body>
-</html>
+</html> 

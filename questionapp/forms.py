@@ -16,10 +16,15 @@ class Instruction_Form(ModelForm):
 
 class Question_Form(ModelForm):
     class Meta:
-        model = Question
-        fields = [ 'category', 'option1', 'option2', 'option3', 'image']
+        model = SpontaniousQuestion
+        fields = [ 'Main_category', 'Sub_category','category', 'option1', 'option2', 'option3','option4', 'image']
 
 class Result_Form(ModelForm):
     class Meta:
-        model = Result
+        model = SpontaniousResult
         fields = ['USERID', 'QUESTIONID', 'response_time', 'is_correct']
+
+class PostQuestion_Form(ModelForm):
+    class Meta:
+        model = PostQuestion
+        fields = ['category', 'option1', 'option2', 'option3', 'option4', 'option5', 'option6', 'image']

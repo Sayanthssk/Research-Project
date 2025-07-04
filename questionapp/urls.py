@@ -26,4 +26,9 @@ urlpatterns = [
     # path('exam/start/', StartExamView.as_view(), name='start_exam'),
     path('exam/question/', ShowQuestionView.as_view(), name='show_question'),
     path('api/submit-result/', views.submit_result, name='submit_result'),
+    path('postorspon', PostOrSpontanious.as_view(), name='postorspon'),
+    path('postappeared', PostAppeared.as_view(), name='postappeared'),
+    path('postorspontquest', PostorSpontQuest.as_view(), name='postorspontquest'),
+    path('managepostquest', ManagePostQuestView.as_view(), name='managepostquest'),
+    path('addpostquest', AddPostQuest.as_view(), name='addpostquest'),
 ]

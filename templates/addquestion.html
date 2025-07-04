@@ -36,7 +36,8 @@
     }
 
     input[type="text"],
-    input[type="file"] {
+    input[type="file"],
+    select {
       width: 100%;
       padding: 10px;
       margin-top: 8px;
@@ -44,6 +45,11 @@
       border: none;
       outline: none;
       background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    select option {
+      background: #333;
       color: #fff;
     }
 
@@ -83,15 +89,33 @@
 </head>
 <body>
 
-  <h1>Add Questions</h1>
+  <h1>Add Spontaneous Expression Question</h1>
 
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
 
+    <!-- Main Category -->
+    <label for="Main_category">Main Category</label>
+    <select id="Main_category" name="Main_category" required>
+      <option value="">Select Main Category</option>
+      <option value="With Occlusion">With Occlusion</option>
+      <option value="Without Occlusion">Without Occlusion</option>
+    </select>
 
+    <!-- Sub Category -->
+    <label for="Sub_category">Sub Category</label>
+    <select id="Sub_category" name="Sub_category" required>
+      <option value="">Select Sub Category</option>
+      <option value="High Intensity">High Intensity</option>
+      <option value="Medium Intensity">Medium Intensity</option>
+      <option value="Low Intensity">Low Intensity</option>
+    </select>
+
+    <!-- Correct Answer -->
     <label for="category">Correct Category (Correct Answer)</label>
     <input type="text" id="category" name="category" placeholder="e.g., disgust" required />
 
+    <!-- Wrong Options -->
     <label for="option1">Wrong Option 1</label>
     <input type="text" id="option1" name="option1" placeholder="e.g., happiness" required />
 
@@ -101,6 +125,10 @@
     <label for="option3">Wrong Option 3</label>
     <input type="text" id="option3" name="option3" placeholder="e.g., surprise" required />
 
+    <label for="option4">Wrong Option 4</label>
+    <input type="text" id="option4" name="option4" placeholder="e.g., Neutrel" required />
+
+    <!-- Upload Image -->
     <label for="image">Upload Question Image</label>
     <input type="file" id="image" name="image" accept="image/*" required />
 

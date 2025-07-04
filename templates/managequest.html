@@ -112,7 +112,7 @@
 </head>
 <body>
 
-  <h1>Manage Questions</h1>
+  <h1>Manage Spontaneous Questions</h1>
 
   <div class="top-bar">
     <a href="/addquest" class="add-btn">➕ Add New Question</a>
@@ -125,6 +125,8 @@
         <img src="{{i.image.url}}" alt="Fruit Image">
       </div>
       <div class="question-details">
+        <h3>Main Category: {{i.Main_category}}</h3>
+        <h3>Sub Category: {{i.Sub_category}}</h3>
         <h3>Category: {{i.category}}</h3>
         <p>Option 1: {{i.option1}}</p>
         <p>Option 2: {{i.option2}}</p>

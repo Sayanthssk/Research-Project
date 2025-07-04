@@ -38,7 +38,7 @@ class LoginView(View):
 
 class AdminDasView(View):
     def get(self, request):
-        c = Question.objects.all().count()
+        c = SpontaniousQuestion.objects.all().count()
         return render(request, 'admindash.html',{'c': c})
     
 class AddUserView(View):
@@ -107,23 +107,23 @@ class AddquestionsView(View):
     
 class ManageQuestView(View):
     def get(self, request):
-        c = Question.objects.all()
+        c = SpontaniousQuestion.objects.all()
         return render(request, 'managequest.html', {'c': c})
     
 class DeleteQuestion(View):
     def get(self, request, id):
-        c = Question.objects.get(id=id)
+        c = SpontaniousQuestion.objects.get(id=id)
         c.delete()
         return HttpResponse('''<script>alert("Question deleted successfully");window.location='/managequest'</script>''')
 
 from django.views import View
 from django.shortcuts import render
 from collections import defaultdict
-from .models import Result, User_Model
+from .models import SpontaniousResult, User_Model
 
 class ViewAppeared(View):
     def get(self, request):
-        results = Result.objects.filter(USERID__LOGINID__usertype='patient').select_related('USERID')
+        results = SpontaniousResult.objects.filter(USERID__LOGINID__usertype='patient').select_related('USERID')
 
         # Group results by user
         user_results = defaultdict(list)
@@ -159,7 +159,7 @@ class ViewAppeared(View):
     
 class ControllerAppeared(View):
     def get(self, request):
-        results = Result.objects.filter(USERID__LOGINID__usertype='controller').select_related('USERID')
+        results = SpontaniousResult.objects.filter(USERID__LOGINID__usertype='controller').select_related('USERID')
 
         # Group results by user
         user_results = defaultdict(list)
@@ -206,7 +206,7 @@ import random
 import time
 from django.shortcuts import render, redirect
 from django.views import View
-from .models import Question, Result, User_Model
+from .models import SpontaniousResult, User_Model
 from django.utils import timezone
 from django.http import JsonResponse
 
@@ -275,7 +275,7 @@ import random
 import random
 from django.views import View
 from django.shortcuts import render
-from .models import Question
+
 
 # class ShowQuestionView(View):
 #     def get(self, request):
@@ -298,10 +298,10 @@ from django.utils.decorators import method_decorator
 
 class ShowQuestionView(View):
     def get(self, request):
-        questions = Question.objects.order_by('?')
+        questions = SpontaniousQuestion.objects.order_by('?')
         data = []
         for q in questions:
-            options = [q.category, q.option1, q.option2, q.option3]
+            options = [q.category, q.option1, q.option2, q.option3, q.option4]
             random.shuffle(options)
             data.append({
                 'id': q.id,
@@ -332,7 +332,7 @@ class ShowQuestionView(View):
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
-from .models import Result, Question, User_Model
+from .models import SpontaniousQuestion, User_Model
 from .forms import Result_Form
 
   
@@ -343,13 +343,13 @@ def submit_result(request):
 
         try:
             user = User_Model.objects.get(id=data['USERID'])
-            question = Question.objects.get(id=data['QUESTIONID'])
+            question = SpontaniousQuestion.objects.get(id=data['QUESTIONID'])
             selected_answer = data['selected_answer']
             response_time = float(data['response_time'])
 
             is_correct = (selected_answer == question.category)
 
-            result = Result(
+            result = SpontaniousResult(
                 USERID=user,
                 QUESTIONID=question,
                 response_time=response_time,
@@ -363,3 +363,58 @@ def submit_result(request):
 
     return JsonResponse({'status': 'invalid request'}, status=405)
             
+
+class PostOrSpontanious(View):
+    def get(self, request):
+        return render(request, 'postOrSpontanious.html')
+    
+class PostAppeared(View):
+    def get(self, request):
+        results = PostResult.objects.filter(USERID__LOGINID__usertype='patient').select_related('USERID')
+
+        # Group results by user
+        user_results = defaultdict(list)
+
+        for res in results:
+            user_results[res.USERID].append(res)
+
+        # Build a list of structured rows for the template
+        rows = []
+
+        for user, res_list in user_results.items():
+            # Fill 10 slots max
+            slots = [None] * 10
+            filled = 0
+
+            for res in res_list:
+                if filled < 10:
+                    slots[filled] = res
+                    filled += 1
+
+            total_correct = sum(1 for r in slots if r and r.is_correct)
+
+            rows.append({
+                'user': user,
+                'results': slots,
+                'total_correct': total_correct
+            })
+        return render(request, 'Postappearedpatients.html', {'rows':rows})
+    
+
+class PostorSpontQuest(View):
+    def get(self, request):
+        return render(request, 'postorspontquest.html')
+    
+class ManagePostQuestView(View):
+    def get(self, request):
+        c = PostQuestion.objects.all()
+        return render(request, 'managepostquest.html', {'c': c})
+    
+class AddPostQuest(View):
+    def get(self, request):
+        return render(request, 'addpostquest.html')
+    def post(self, request):
+        c = PostQuestion_Form(request.POST, request.FILES)
+        if c.is_valid():
+            c.save()
+            return HttpResponse('''<script>alert("Question added successfully");window.location='/managepostquest'</script>''')
