@@ -1,0 +1,581 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Exam Questions</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      color: #000;
+      text-align: center;
+      padding: 30px;
+      margin: 0;
+    }
+
+    .question-container {
+      display: none;
+      background-color: #ffffff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 600px;
+      margin: 0 auto 20px;
+    }
+
+    h1 {
+      display: none;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      margin: 20px 0;
+      opacity: 1;
+      transition: opacity 1s ease;
+    }
+
+    .fade-out {
+      opacity: 0;
+    }
+
+    #optionsContainer {
+      display: none;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    .fade-in {
+      display: block !important;
+      opacity: 1 !important;
+    }
+
+    input[type="radio"] {
+      margin: 10px;
+    }
+
+    #nextBtn {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 20px auto;
+      display: none;
+    }
+
+    #timer {
+      font-size: 18px;
+      margin-top: 10px;
+      color: #333;
+      display: none;
+    }
+
+    .error {
+      color: red;
+      font-size: 14px;
+      display: none;
+      margin-bottom: 10px;
+    }
+
+    #plusMark {
+      display: none;
+      font-size: 40px;
+      color: #444;
+      font-weight: normal;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    #plusMark.visible {
+      display: block;
+      opacity: 1;
+    }
+
+    #plusMark.hidden {
+      opacity: 0;
+    }
+  </style>
+</head>
+
+<body data-user-id="{{ user_id }}">
+
+  <h1>Exam Questions</h1>
+
+  <div id="plusMark">✛</div>
+
+
+  <div id="questionContainer" class="question-container">
+    <img id="questionImage" src="" alt="question image">
+    <div id="optionsContainer"></div>
+    <div id="timer">Time: 0 ms</div>
+    <div id="error" class="error">Please select an option to proceed.</div>
+  </div>
+
+  <button id="nextBtn" disabled>Next</button>
+
+  {{ data|json_script:"question-data" }}
+
+  <script>
+    const questionData = JSON.parse(document.getElementById("question-data").textContent);
+    const userId = document.body.dataset.userId;
+
+    let currentIndex = 0;
+    let responseTimes = [];
+    let startTime = 0;
+    let animationFrameId;
+    let delayTimeout;
+
+    const questionContainer = document.getElementById('questionContainer');
+    const questionImage = document.getElementById('questionImage');
+    const optionsContainer = document.getElementById('optionsContainer');
+    const nextBtn = document.getElementById('nextBtn');
+    const timerDisplay = document.getElementById('timer');
+    const errorMsg = document.getElementById('error');
+    const plusMark = document.getElementById('plusMark');
+
+    function startTimer() {
+      startTime = performance.now();
+      updateTimer();
+    }
+
+    function updateTimer() {
+      const elapsed = performance.now() - startTime;
+      timerDisplay.textContent = `Time: ${elapsed.toFixed(0)} ms`;
+      animationFrameId = requestAnimationFrame(updateTimer);
+    }
+
+    function stopTimer() {
+      cancelAnimationFrame(animationFrameId);
+      const elapsed = performance.now() - startTime;
+      return elapsed.toFixed(0);
+    }
+
+    function showFixation(callback) {
+      plusMark.classList.add("visible");
+      plusMark.classList.remove("hidden");
+
+      setTimeout(() => {
+        plusMark.classList.add("hidden");
+        plusMark.classList.remove("visible");
+
+        setTimeout(() => {
+          plusMark.style.display = "none";
+          callback();
+        }, 500); 
+      }, 500); 
+    }
+
+    function showQuestion(index) {
+      const question = questionData[index];
+      if (!question) return;
+
+      errorMsg.style.display = 'none';
+      questionImage.classList.remove("fade-out");
+      questionImage.style.display = 'none';
+      optionsContainer.classList.remove("fade-in");
+      optionsContainer.style.display = 'none';
+      nextBtn.disabled = true;
+      nextBtn.style.display = 'none';
+      optionsContainer.innerHTML = '';
+
+     
+      plusMark.style.display = "block";
+      showFixation(() => {
+        questionImage.src = question.image;
+        questionImage.style.display = 'block';
+        questionContainer.style.display = 'block';
+
+        question.options.forEach((opt) => {
+          const label = document.createElement('label');
+          const radio = document.createElement('input');
+          radio.type = 'radio';
+          radio.name = 'option';
+          radio.value = opt;
+          label.appendChild(radio);
+          label.appendChild(document.createTextNode(" " + opt));
+          optionsContainer.appendChild(label);
+          optionsContainer.appendChild(document.createElement('br'));
+        });
+
+        delayTimeout = setTimeout(() => {
+          questionImage.classList.add("fade-out");
+
+          setTimeout(() => {
+            questionImage.style.display = 'none';
+            optionsContainer.classList.add("fade-in");
+            nextBtn.style.display = 'block';
+            nextBtn.disabled = false;
+            startTimer();
+          }, 1000);
+        }, 5000);
+      });
+    }
+
+    function getCSRFToken() {
+      const name = "csrftoken=";
+      const cookies = document.cookie.split(';');
+      for (let cookie of cookies) {
+        cookie = cookie.trim();
+        if (cookie.startsWith(name)) {
+          return cookie.substring(name.length);
+        }
+      }
+      return "";
+    }
+
+    nextBtn.addEventListener('click', () => {
+      const selected = document.querySelector('input[name="option"]:checked');
+      if (!selected) {
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      errorMsg.style.display = 'none';
+      const timeTaken = stopTimer();
+      const selectedAnswer = selected.value;
+      const currentQuestion = questionData[currentIndex - 1];
+
+      fetch('/api/submit-result/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({
+          USERID: userId,
+          QUESTIONID: currentQuestion.id,
+          selected_answer: selectedAnswer,
+          response_time: timeTaken
+        })
+      }).then(res => res.json())
+        .then(data => {
+          console.log("Saved:", data);
+        }).catch(err => {
+          console.error("Save failed:", err);
+        });
+
+      responseTimes.push(`${timeTaken} ms`);
+      cancelAnimationFrame(animationFrameId);
+      clearTimeout(delayTimeout);
+
+      questionImage.style.display = 'block';
+      questionImage.classList.remove("fade-out");
+      optionsContainer.classList.remove("fade-in");
+
+      if (currentIndex < questionData.length) {
+        showQuestion(currentIndex);
+        currentIndex++;
+      } else {
+        questionContainer.innerHTML = `<h2>No more questions</h2><p>Response times: ${responseTimes.join(', ')}</p>`;
+        nextBtn.style.display = "none";
+        setTimeout(() => {
+          window.location.href = "/controllerdash";
+        }, 1000);
+      }
+    });
+
+    showQuestion(currentIndex);
+    currentIndex++;
+  </script>
+</body>
+</html>  -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spontaneous Questions</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      color: #000;
+      text-align: center;
+      padding: 30px;
+      margin: 0;
+    }
+
+    .question-container {
+      display: none;
+      background-color: #ffffff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 600px;
+      margin: 0 auto 20px;
+    }
+
+    h1 {
+      display: none;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      margin: 20px 0;
+      opacity: 1;
+      transition: opacity 1s ease;
+    }
+
+    .fade-out {
+      opacity: 0;
+    }
+
+    #optionsContainer {
+      display: none;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    .fade-in {
+      display: block !important;
+      opacity: 1 !important;
+    }
+
+    input[type="radio"] {
+      margin: 10px;
+    }
+
+    #nextBtn {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 20px auto;
+      display: none;
+    }
+
+    #timer {
+      font-size: 18px;
+      margin-top: 10px;
+      color: #333;
+  display: none !important; 
+    }
+
+    .error {
+      color: red;
+      font-size: 14px;
+      display: none;
+      margin-bottom: 10px;
+    }
+
+    #plusMark {
+      display: none;
+      font-size: 40px;
+      color: #444;
+      font-weight: normal;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    #plusMark.visible {
+      display: block;
+      opacity: 1;
+    }
+
+    #plusMark.hidden {
+      opacity: 0;
+    }
+
+  </style>
+</head>
+
+<body data-user-id="{{ user_id }}">
+
+  <h1>Spontaneous Questions</h1>
+
+  <div id="plusMark">✛</div>
+
+  <div id="questionContainer" class="question-container">
+    <img id="questionImage" src="" alt="question image">
+    <div id="optionsContainer"></div>
+    <div id="timer">Time: 0 ms</div>
+    <div id="error" class="error">Please select an option to proceed.</div>
+  </div>
+
+  <button id="nextBtn" disabled>Next</button>
+
+  {{ data|json_script:"question-data" }}
+
+  <script>
+    const questionData = JSON.parse(document.getElementById("question-data").textContent);
+    const userId = document.body.dataset.userId;
+
+    let currentIndex = 0;
+    let responseTimes = [];
+    let startTime = 0;
+    let animationFrameId;
+    let delayTimeout;
+
+    const questionContainer = document.getElementById('questionContainer');
+    const questionImage = document.getElementById('questionImage');
+    const optionsContainer = document.getElementById('optionsContainer');
+    const nextBtn = document.getElementById('nextBtn');
+    const timerDisplay = document.getElementById('timer');
+    const errorMsg = document.getElementById('error');
+    const plusMark = document.getElementById('plusMark');
+
+    function startTimer() {
+      startTime = performance.now();
+      updateTimer();
+    }
+
+    function updateTimer() {
+      const elapsed = performance.now() - startTime;
+      timerDisplay.textContent = `Time: ${elapsed.toFixed(0)} ms`;
+      animationFrameId = requestAnimationFrame(updateTimer);
+    }
+
+    function stopTimer() {
+      cancelAnimationFrame(animationFrameId);
+      const elapsed = performance.now() - startTime;
+      return elapsed.toFixed(0);
+    }
+
+    function showFixation(callback) {
+      plusMark.classList.add("visible");
+      plusMark.classList.remove("hidden");
+
+      setTimeout(() => {
+        plusMark.classList.add("hidden");
+        plusMark.classList.remove("visible");
+
+        setTimeout(() => {
+          plusMark.style.display = "none";
+          callback();
+        }, 500);
+      }, 500);
+    }
+
+    function showQuestion(index) {
+      const question = questionData[index];
+      if (!question) return;
+
+      errorMsg.style.display = 'none';
+      questionImage.classList.remove("fade-out");
+      questionImage.style.display = 'none';
+      optionsContainer.classList.remove("fade-in");
+      optionsContainer.style.display = 'none';
+      nextBtn.disabled = true;
+      nextBtn.style.display = 'none';
+      optionsContainer.innerHTML = '';
+
+      plusMark.style.display = "block";
+      showFixation(() => {
+        questionImage.src = question.image;
+        questionImage.style.display = 'block';
+        questionContainer.style.display = 'block';
+
+        shuffleArray(question.options).forEach((opt) => {
+          const label = document.createElement('label');
+          const radio = document.createElement('input');
+          radio.type = 'radio';
+          radio.name = 'option';
+          radio.value = opt;
+          label.appendChild(radio);
+          label.appendChild(document.createTextNode(" " + opt));
+          optionsContainer.appendChild(label);
+          optionsContainer.appendChild(document.createElement('br'));
+        });
+
+        delayTimeout = setTimeout(() => {
+          questionImage.classList.add("fade-out");
+
+          setTimeout(() => {
+            questionImage.style.display = 'none';
+            optionsContainer.classList.add("fade-in");
+            nextBtn.style.display = 'block';
+            nextBtn.disabled = false;
+            timerDisplay.style.display = 'block';
+            startTimer();
+          }, 1000);
+        }, 5000);
+      });
+    }
+
+    function getCSRFToken() {
+      const name = "csrftoken=";
+      const cookies = document.cookie.split(';');
+      for (let cookie of cookies) {
+        cookie = cookie.trim();
+        if (cookie.startsWith(name)) {
+          return cookie.substring(name.length);
+        }
+      }
+      return "";
+    }
+
+    function shuffleArray(array) {
+      return array.map(value => ({ value, sort: Math.random() }))
+                  .sort((a, b) => a.sort - b.sort)
+                  .map(({ value }) => value);
+    }
+
+    nextBtn.addEventListener('click', () => {
+      const selected = document.querySelector('input[name="option"]:checked');
+      if (!selected) {
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      errorMsg.style.display = 'none';
+      const timeTaken = stopTimer();
+      const selectedAnswer = selected.value;
+      const currentQuestion = questionData[currentIndex - 1];
+
+      fetch('/api/spontanious-submit/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({
+          USERID: userId,
+          QUESTIONID: currentQuestion.id,
+          selected_answer: selectedAnswer,
+          response_time: timeTaken
+        })
+      }).then(res => res.json())
+        .then(data => {
+          console.log("Saved:", data);
+        }).catch(err => {
+          console.error("Save failed:", err);
+        });
+
+      responseTimes.push(`${timeTaken} ms`);
+      cancelAnimationFrame(animationFrameId);
+      clearTimeout(delayTimeout);
+
+      questionImage.style.display = 'block';
+      questionImage.classList.remove("fade-out");
+      optionsContainer.classList.remove("fade-in");
+
+      if (currentIndex < questionData.length) {
+        showQuestion(currentIndex);
+        currentIndex++;
+      } else {
+        questionContainer.innerHTML = `<h2>All Done!</h2><p>Response times: ${responseTimes.join(', ')}</p>`;
+        nextBtn.style.display = "none";
+        setTimeout(() => {
+          window.location.href = "/controllerdash";
+        }, 2000);
+      }
+    });
+
+    showQuestion(currentIndex);
+    currentIndex++;
+  </script>
+</body>
+</html>

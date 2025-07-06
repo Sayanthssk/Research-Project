@@ -18,6 +18,7 @@ urlpatterns = [
     path('addinst', AddInstructionView.as_view(), name='addinst'),
     path('removeuser/<int:id>', RemoveUserView.as_view(), name='removeuser'),
     path('deleteinst/<int:id>', DeleteInstruction.as_view(), name='deleteinst'),
+    path('deletepostquest/<int:id>', DeletePostQuestion.as_view(), name='deletepostquest'),
     path('editinst/<int:id>', EditInst.as_view(), name='editinst'),
     path('deletequest/<int:id>', DeleteQuestion.as_view(), name='deleteuquest'),
 
@@ -31,8 +32,10 @@ urlpatterns = [
     path('postorspontquest', PostorSpontQuest.as_view(), name='postorspontquest'),
     path('managepostquest', ManagePostQuestView.as_view(), name='managepostquest'),
     path('addpostquest', AddPostQuest.as_view(), name='addpostquest'),
-    path('postorspontcont', ControllerPostorSpont.as_view(), name='postorspontcont'),
+    path('postorspontcont', ControllerPostorSpontuser.as_view(), name='postorspontcont'),
     path('postappearedcontroller', PostAppearedController.as_view(), name='postappearedcontroller'),
     path('contpostorspont', ControllerPostorSpont.as_view(), name='contpostorspont'),
     path('spontaneousinstruction', Spontaneousinstruction.as_view(), name='spontaneousinstruction'),
+    path('spontaniousquestion', SpontaniousQuestionView.as_view(), name='spontaniousquestion'),
+    path('api/spontanious-submit/', SubmitSpontaniousResultView.as_view(), name='spontanious_submit'),
 ]

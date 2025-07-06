@@ -121,28 +121,27 @@ from django.shortcuts import render
 from collections import defaultdict
 from .models import SpontaniousResult, User_Model
 
+from django.views import View
+from django.shortcuts import render
+from collections import defaultdict
+from .models import SpontaniousResult
+
 class ViewAppeared(View):
     def get(self, request):
-        results = SpontaniousResult.objects.filter(USERID__LOGINID__usertype='patient').select_related('USERID')
+        # Get all results for patients only
+        results = SpontaniousResult.objects.filter(
+            USERID__LOGINID__usertype='patient'
+        ).select_related('USERID').order_by('USERID', 'id')  # Order by user and result ID
 
-        # Group results by user
         user_results = defaultdict(list)
-
         for res in results:
             user_results[res.USERID].append(res)
 
-        # Build a list of structured rows for the template
         rows = []
 
         for user, res_list in user_results.items():
-            # Fill 10 slots max
-            slots = [None] * 10
-            filled = 0
-
-            for res in res_list:
-                if filled < 10:
-                    slots[filled] = res
-                    filled += 1
+            # Make sure we have exactly 49 results, fill with None if less
+            slots = res_list[:49] + [None] * (49 - len(res_list))
 
             total_correct = sum(1 for r in slots if r and r.is_correct)
 
@@ -156,29 +155,24 @@ class ViewAppeared(View):
 
 
 
+
     
 class ControllerAppeared(View):
     def get(self, request):
-        results = SpontaniousResult.objects.filter(USERID__LOGINID__usertype='controller').select_related('USERID')
+        # Get all results for controllers only
+        results = SpontaniousResult.objects.filter(
+            USERID__LOGINID__usertype='controller'
+        ).select_related('USERID').order_by('USERID', 'id')  # Order by user and result ID
 
-        # Group results by user
         user_results = defaultdict(list)
-
         for res in results:
             user_results[res.USERID].append(res)
 
-        # Build a list of structured rows for the template
         rows = []
 
         for user, res_list in user_results.items():
-            # Fill 10 slots max
-            slots = [None] * 10
-            filled = 0
-
-            for res in res_list:
-                if filled < 10:
-                    slots[filled] = res
-                    filled += 1
+            # Make sure we have exactly 49 results, fill with None if less
+            slots = res_list[:49] + [None] * (49 - len(res_list))
 
             total_correct = sum(1 for r in slots if r and r.is_correct)
 
@@ -368,37 +362,39 @@ class PostOrSpontanious(View):
     def get(self, request):
         return render(request, 'postOrSpontanious.html')
     
+from django.shortcuts import render
+from django.views import View
+from collections import defaultdict
+from .models import PostResult, PostQuestion
+
 class PostAppeared(View):
     def get(self, request):
-        results = PostResult.objects.filter(USERID__LOGINID__usertype='patient').select_related('USERID')
+        results = PostResult.objects.filter(USERID__LOGINID__usertype='patient').select_related('USERID', 'QUESTIONID')
+        questions = list(PostQuestion.objects.order_by('id'))
 
-        # Group results by user
-        user_results = defaultdict(list)
+        user_results = defaultdict(lambda: [None] * len(questions))
+
+        question_id_index = {q.id: idx for idx, q in enumerate(questions)}
 
         for res in results:
-            user_results[res.USERID].append(res)
+            idx = question_id_index.get(res.QUESTIONID.id)
+            if idx is not None:
+                user_results[res.USERID][idx] = res
 
-        # Build a list of structured rows for the template
         rows = []
-
-        for user, res_list in user_results.items():
-            # Fill 10 slots max
-            slots = [None] * 10
-            filled = 0
-
-            for res in res_list:
-                if filled < 10:
-                    slots[filled] = res
-                    filled += 1
-
-            total_correct = sum(1 for r in slots if r and r.is_correct)
-
+        for user, answers in user_results.items():
+            total_correct = sum(1 for r in answers if r and r.is_correct)
             rows.append({
                 'user': user,
-                'results': slots,
+                'results': answers,
                 'total_correct': total_correct
             })
-        return render(request, 'Postappearedpatients.html', {'rows':rows})
+
+        return render(request, 'Postappearedpatients.html', {'rows': rows, 'questions': questions})
+
+
+
+
     
 
 class PostorSpontQuest(View):
@@ -409,6 +405,12 @@ class ManagePostQuestView(View):
     def get(self, request):
         c = PostQuestion.objects.all()
         return render(request, 'managepostquest.html', {'c': c})
+    
+class DeletePostQuestion(View):
+    def get(self, request, id):
+        c = PostQuestion.objects.get(id=id)
+        c.delete()
+        return HttpResponse('''<script>alert("Question deleted successfully");window.location='/managepostquest'</script>''')
     
 class AddPostQuest(View):
     def get(self, request):
@@ -425,38 +427,31 @@ class ControllerPostorSpont(View):
     
 class PostAppearedController(View):
     def get(self, request):
-        results = PostResult.objects.filter(USERID__LOGINID__usertype='controller').select_related('USERID')
+        results = PostResult.objects.filter(USERID__LOGINID__usertype='controller').select_related('USERID', 'QUESTIONID')
+        questions = list(PostQuestion.objects.order_by('id'))
 
-        # Group results by user
-        user_results = defaultdict(list)
+        user_results = defaultdict(lambda: [None] * len(questions))
+
+        question_id_index = {q.id: idx for idx, q in enumerate(questions)}
 
         for res in results:
-            user_results[res.USERID].append(res)
+            idx = question_id_index.get(res.QUESTIONID.id)
+            if idx is not None:
+                user_results[res.USERID][idx] = res
 
-        # Build a list of structured rows for the template
         rows = []
-
-        for user, res_list in user_results.items():
-            # Fill 10 slots max
-            slots = [None] * 10
-            filled = 0
-
-            for res in res_list:
-                if filled < 10:
-                    slots[filled] = res
-                    filled += 1
-
-            total_correct = sum(1 for r in slots if r and r.is_correct)
-
+        for user, answers in user_results.items():
+            total_correct = sum(1 for r in answers if r and r.is_correct)
             rows.append({
                 'user': user,
-                'results': slots,
+                'results': answers,
                 'total_correct': total_correct
             })
-        return render(request, 'postappeardcontroller.html', {'rows': rows})
+
+        return render(request, 'postappeardcontroller.html', {'rows': rows, 'questions': questions})
     
 
-class ControllerPostorSpont(View):
+class ControllerPostorSpontuser(View):
     def get(self, request):
         return render(request, 'Controller/postorspontquestion.html')
     
@@ -464,3 +459,111 @@ class Spontaneousinstruction(View):
     def get(self, request):
         c = Instructions_Model.objects.all()
         return render(request, 'Controller/spontaneousinstruction.html', {'c': c})
+    
+
+from django.views import View
+from django.shortcuts import render
+from django.http import JsonResponse
+from .models import SpontaniousQuestion, SpontaniousResult, User_Model
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+import json
+
+import random
+from django.views import View
+from django.shortcuts import render
+from .models import SpontaniousQuestion
+
+from django.views import View
+from django.shortcuts import render, HttpResponse
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from .models import SpontaniousQuestion, SpontaniousResult, User_Model
+import random, json
+
+
+class SpontaniousQuestionView(View):
+    def get(self, request):
+        def fetch_random(category, subcategory):
+            return list(
+                SpontaniousQuestion.objects.filter(
+                    Main_category__iexact=category,
+                    Sub_category__iexact=subcategory
+                )
+            )
+
+        # Step 1: Get Login ID from session
+        login_id = request.session.get('user_id')
+        if not login_id:
+            return HttpResponse("Login ID not found in session", status=401)
+
+        # Step 2: Resolve User_Model from Login ID
+        try:
+            user_model = User_Model.objects.get(LOGINID_id=login_id)
+        except User_Model.DoesNotExist:
+            return HttpResponse("User profile not found", status=404)
+
+        # Step 3: Fetch question groups
+        groups = [
+            fetch_random("Without Occlusion", "High Intensity"),
+            fetch_random("Without Occlusion", "Medium Intensity"),
+            fetch_random("Without Occlusion", "Low Intensity"),
+            fetch_random("With Occlusion", "High Intensity"),
+            fetch_random("With Occlusion", "Medium Intensity"),
+            fetch_random("With Occlusion", "Low Intensity"),
+        ]
+
+        for group in groups:
+            random.shuffle(group)
+
+        all_questions = sum(groups, [])
+
+        data = [
+            {
+                "id": q.id,
+                "image": q.image.url,
+                "options": [q.category, q.option1, q.option2, q.option3, q.option4],
+                "answer": q.category
+            }
+            for q in all_questions
+        ]
+
+        return render(request, 'Controller/spontaniousquestion.html', {
+            'data': data,
+            'user_id': user_model.id  # Correct USER ID from User_Model
+        })
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class SubmitSpontaniousResultView(View):
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+
+            user_id = data.get('USERID')
+            question_id = data.get('QUESTIONID')
+            selected = data.get('selected_answer')
+            response_time = data.get('response_time')
+
+            if not all([user_id, question_id, selected, response_time]):
+                return JsonResponse({'status': 'error', 'message': 'Missing fields'}, status=400)
+
+            question = SpontaniousQuestion.objects.get(id=question_id)
+            user = User_Model.objects.get(id=user_id)
+
+            is_correct = (selected == question.category)
+
+            result = SpontaniousResult.objects.create(
+                USERID=user,
+                QUESTIONID=question,
+                response_time=response_time,
+                is_correct=is_correct
+            )
+
+            return JsonResponse({'status': 'success', 'is_correct': is_correct})
+
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+
