@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Expression Page</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      color: #000;
+    }
+
+    .header {
+      background: linear-gradient(to bottom, #c6e2f3, #ffffff);
+      padding: 15px 0;
+      border-bottom: 4px solid #12659c;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: center;
+      background-color: #12659c;
+      padding: 8px 0;
+    }
+
+    .nav a {
+      color: white;
+      text-decoration: none;
+      padding: 8px 20px;
+      font-weight: bold;
+      border-right: 1px solid white;
+    }
+
+    .nav a:last-child {
+      border-right: none;
+    }
+
+    .nav a:hover {
+      background-color: #0a4d7b;
+    }
+
+    .content {
+      padding: 20px 40px;
+      max-width: 900px;
+      margin: auto;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+
+    p {
+      font-size: 15px;
+      line-height: 1.6;
+      text-align: justify;
+    }
+
+    .footer {
+      margin-top: 40px;
+      padding: 10px;
+      background-color: #f2f2f2;
+      text-align: center;
+      font-size: 13px;
+      color: #555;
+      border-top: 1px solid #ddd;
+      margin-top: 410px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #12659c;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      margin: 20px 10px;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #0a4d7b;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="title">Expression Options</div>
+  </div>
+
+  <div class="nav">
+    <a href="/controllerdash">Home</a>
+  </div>
+
+  <div class="content">
+    <h2>Select Your Type of Question</h2>
+    <a href="#" class="btn" onclick="window.location='/spontaneousinstruction'">Spontaneous Expression</a>
+    <a href="#" class="btn" onclick="window.location='/instruction'">Post Expression</a>
+  </div>
+
+  <div class="footer">
+    &copy; 2025 Your Site Name. All rights reserved.
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Instructions</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      color: #333;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 60px auto;
+      padding: 40px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      background-color: #f9f9f9;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+      color: #222;
+    }
+
+    h2 {
+      font-size: 18px;
+      font-weight: normal;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    .continue-btn {
+      margin-top: 30px;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #12659c;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .continue-btn:hover {
+      background-color: #12659c;
+    }
+
+    .cross-mark {
+    display: none;
+    font-size: 120px;
+    color: black;
+    text-align: center;
+    margin-top: 20vh;
+    animation: fadeInOut 5s ease;
+    font-weight: bold;
+  }
+
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="instructionBox">
+    {% for i in c %}
+      <h1>{{ i.title }}</h1>
+      <h2>{{ i.content }}</h2>
+    {% endfor %}
+    <button class="continue-btn" onclick="window.location.href = '/exam/question/'">Continue</button>
+  </div>
+
+
+
+</body>
+</html>

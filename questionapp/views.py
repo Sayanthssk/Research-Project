@@ -298,10 +298,10 @@ from django.utils.decorators import method_decorator
 
 class ShowQuestionView(View):
     def get(self, request):
-        questions = SpontaniousQuestion.objects.order_by('?')
+        questions = PostQuestion.objects.order_by('?')
         data = []
         for q in questions:
-            options = [q.category, q.option1, q.option2, q.option3, q.option4]
+            options = [q.category, q.option1, q.option2, q.option3, q.option4, q.option5, q.option6]  # category is assumed to be correct
             random.shuffle(options)
             data.append({
                 'id': q.id,
@@ -343,13 +343,13 @@ def submit_result(request):
 
         try:
             user = User_Model.objects.get(id=data['USERID'])
-            question = SpontaniousQuestion.objects.get(id=data['QUESTIONID'])
+            question = PostQuestion.objects.get(id=data['QUESTIONID'])
             selected_answer = data['selected_answer']
             response_time = float(data['response_time'])
 
             is_correct = (selected_answer == question.category)
 
-            result = SpontaniousResult(
+            result = PostResult(
                 USERID=user,
                 QUESTIONID=question,
                 response_time=response_time,
@@ -418,3 +418,49 @@ class AddPostQuest(View):
         if c.is_valid():
             c.save()
             return HttpResponse('''<script>alert("Question added successfully");window.location='/managepostquest'</script>''')
+
+class ControllerPostorSpont(View):
+    def get(self, request):
+        return render(request, 'postorspontcont.html')
+    
+class PostAppearedController(View):
+    def get(self, request):
+        results = PostResult.objects.filter(USERID__LOGINID__usertype='controller').select_related('USERID')
+
+        # Group results by user
+        user_results = defaultdict(list)
+
+        for res in results:
+            user_results[res.USERID].append(res)
+
+        # Build a list of structured rows for the template
+        rows = []
+
+        for user, res_list in user_results.items():
+            # Fill 10 slots max
+            slots = [None] * 10
+            filled = 0
+
+            for res in res_list:
+                if filled < 10:
+                    slots[filled] = res
+                    filled += 1
+
+            total_correct = sum(1 for r in slots if r and r.is_correct)
+
+            rows.append({
+                'user': user,
+                'results': slots,
+                'total_correct': total_correct
+            })
+        return render(request, 'postappeardcontroller.html', {'rows': rows})
+    
+
+class ControllerPostorSpont(View):
+    def get(self, request):
+        return render(request, 'Controller/postorspontquestion.html')
+    
+class Spontaneousinstruction(View):
+    def get(self, request):
+        c = Instructions_Model.objects.all()
+        return render(request, 'Controller/spontaneousinstruction.html', {'c': c})

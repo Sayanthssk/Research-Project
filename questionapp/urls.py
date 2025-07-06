@@ -31,4 +31,8 @@ urlpatterns = [
     path('postorspontquest', PostorSpontQuest.as_view(), name='postorspontquest'),
     path('managepostquest', ManagePostQuestView.as_view(), name='managepostquest'),
     path('addpostquest', AddPostQuest.as_view(), name='addpostquest'),
+    path('postorspontcont', ControllerPostorSpont.as_view(), name='postorspontcont'),
+    path('postappearedcontroller', PostAppearedController.as_view(), name='postappearedcontroller'),
+    path('contpostorspont', ControllerPostorSpont.as_view(), name='contpostorspont'),
+    path('spontaneousinstruction', Spontaneousinstruction.as_view(), name='spontaneousinstruction'),
 ]
