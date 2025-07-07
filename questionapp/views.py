@@ -126,64 +126,191 @@ from django.shortcuts import render
 from collections import defaultdict
 from .models import SpontaniousResult
 
+# class ViewAppeared(View):
+#     def get(self, request):
+#         # Get all results for patients only
+#         results = SpontaniousResult.objects.filter(
+#             USERID__LOGINID__usertype='patient'
+#         ).select_related('USERID').order_by('USERID', 'id')  # Order by user and result ID
+
+#         user_results = defaultdict(list)
+#         for res in results:
+#             user_results[res.USERID].append(res)
+
+#         rows = []
+
+#         for user, res_list in user_results.items():
+#             # Make sure we have exactly 49 results, fill with None if less
+#             slots = res_list[:49] + [None] * (49 - len(res_list))
+
+#             total_correct = sum(1 for r in slots if r and r.is_correct)
+
+#             rows.append({
+#                 'user': user,
+#                 'results': slots,
+#                 'total_correct': total_correct
+#             })
+
+#         return render(request, 'viewattendeduser.html', {'rows': rows})
+
+
+from collections import defaultdict, Counter
+from django.views import View
+from django.shortcuts import render
+from .models import SpontaniousResult
+
 class ViewAppeared(View):
     def get(self, request):
-        # Get all results for patients only
-        results = SpontaniousResult.objects.filter(
+        results = SpontaniousResult.objects.select_related('USERID', 'QUESTIONID').filter(
             USERID__LOGINID__usertype='patient'
-        ).select_related('USERID').order_by('USERID', 'id')  # Order by user and result ID
+        ).order_by('USERID', 'id')
 
         user_results = defaultdict(list)
+        all_labels = []
+        label_count = Counter()
+
+        # Build unique label per question
         for res in results:
-            user_results[res.USERID].append(res)
+            q = res.QUESTIONID
+            if q:
+                prefix = ""
+                if q.Main_category and "without" in q.Main_category.lower():
+                    prefix += "WO"
+                elif q.Main_category and "with" in q.Main_category.lower():
+                    prefix += "WC"
+                else:
+                    prefix += "UK"
+
+                if q.Sub_category:
+                    if "high" in q.Sub_category.lower():
+                        prefix += "H"
+                    elif "medium" in q.Sub_category.lower():
+                        prefix += "M"
+                    elif "low" in q.Sub_category.lower():
+                        prefix += "L"
+                    else:
+                        prefix += "X"
+
+                base_label = f"{prefix}_{q.category}"
+                label_count[base_label] += 1
+                full_label = f"{base_label}{label_count[base_label]}"
+
+                all_labels.append(full_label)
+                user_results[res.USERID].append((full_label, res))
+
+        sorted_labels = sorted(all_labels, key=lambda x: (x.split('_')[0], x.split('_')[1]))
 
         rows = []
+        for user, res_pairs in user_results.items():
+            result_map = {}
+            for label, res in res_pairs:
+                result_map[label] = {
+                    'is_correct': res.is_correct,
+                    'response_time': res.response_time
+                }
 
-        for user, res_list in user_results.items():
-            # Make sure we have exactly 49 results, fill with None if less
-            slots = res_list[:49] + [None] * (49 - len(res_list))
-
-            total_correct = sum(1 for r in slots if r and r.is_correct)
-
-            rows.append({
+            row = {
                 'user': user,
-                'results': slots,
-                'total_correct': total_correct
-            })
+                'result_map': result_map,
+                'total_correct': sum(1 for r in result_map.values() if r['is_correct']),
+                'flattened_results': []
+            }
 
-        return render(request, 'viewattendeduser.html', {'rows': rows})
+            # Align results with labels
+            for label in sorted_labels:
+                if label in result_map:
+                    row['flattened_results'].append(result_map[label])
+                else:
+                    row['flattened_results'].append({'is_correct': None, 'response_time': None})
+
+            rows.append(row)
+
+        return render(request, 'viewattendeduser.html', {
+            'rows': rows,
+            'labels': sorted_labels
+        })
+
 
 
 
 
     
+from collections import defaultdict, Counter
+from django.shortcuts import render
+from django.views import View
+from .models import SpontaniousResult
+
 class ControllerAppeared(View):
     def get(self, request):
-        # Get all results for controllers only
-        results = SpontaniousResult.objects.filter(
+        results = SpontaniousResult.objects.select_related('USERID', 'QUESTIONID').filter(
             USERID__LOGINID__usertype='controller'
-        ).select_related('USERID').order_by('USERID', 'id')  # Order by user and result ID
+        ).order_by('USERID', 'id')
 
         user_results = defaultdict(list)
+        all_labels = []
+        label_count = Counter()
+
+        # Build unique label per question
         for res in results:
-            user_results[res.USERID].append(res)
+            q = res.QUESTIONID
+            if q:
+                prefix = ""
+                if q.Main_category and "without" in q.Main_category.lower():
+                    prefix += "WO"
+                elif q.Main_category and "with" in q.Main_category.lower():
+                    prefix += "WC"
+                else:
+                    prefix += "UK"
+
+                if q.Sub_category:
+                    if "high" in q.Sub_category.lower():
+                        prefix += "H"
+                    elif "medium" in q.Sub_category.lower():
+                        prefix += "M"
+                    elif "low" in q.Sub_category.lower():
+                        prefix += "L"
+                    else:
+                        prefix += "X"
+
+                base_label = f"{prefix}_{q.category}"
+                label_count[base_label] += 1
+                full_label = f"{base_label}{label_count[base_label]}"
+
+                all_labels.append(full_label)
+                user_results[res.USERID].append((full_label, res))
+
+        sorted_labels = sorted(all_labels, key=lambda x: (x.split('_')[0], x.split('_')[1]))
 
         rows = []
+        for user, res_pairs in user_results.items():
+            result_map = {}
+            for label, res in res_pairs:
+                result_map[label] = {
+                    'is_correct': res.is_correct,
+                    'response_time': res.response_time
+                }
 
-        for user, res_list in user_results.items():
-            # Make sure we have exactly 49 results, fill with None if less
-            slots = res_list[:49] + [None] * (49 - len(res_list))
-
-            total_correct = sum(1 for r in slots if r and r.is_correct)
-
-            rows.append({
+            row = {
                 'user': user,
-                'results': slots,
-                'total_correct': total_correct
-            })
+                'result_map': result_map,
+                'total_correct': sum(1 for r in result_map.values() if r['is_correct']),
+                'flattened_results': []
+            }
 
-        return render(request, 'controllerattend.html', {'rows': rows})
-    
+            # Align results with labels
+            for label in sorted_labels:
+                if label in result_map:
+                    row['flattened_results'].append(result_map[label])
+                else:
+                    row['flattened_results'].append({'is_correct': None, 'response_time': None})
+
+            rows.append(row)
+
+        return render(request, 'controllerattend.html', {
+            'rows': rows,
+            'labels': sorted_labels
+        })
+
 
 #/////////////////////////////////////////////// completed admin module ////////////////////////////////////////////////////////////
 

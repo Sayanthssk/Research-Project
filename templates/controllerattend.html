@@ -81,130 +81,44 @@
 
   <div class="table-container">
     <table id="statusTable">
-  <thead>
-    <tr>
-      <th rowspan="2">Patient Name</th>
-      <th colspan="2">Q1</th>
-      <th colspan="2">Q2</th>
-      <th colspan="2">Q3</th>
-      <th colspan="2">Q4</th>
-      <th colspan="2">Q5</th>
-      <th colspan="2">Q6</th>
-      <th colspan="2">Q7</th>
-      <th colspan="2">Q8</th>
-      <th colspan="2">Q9</th>
-      <th colspan="2">Q10</th>
-      <th colspan="2">Q11</th>
-      <th colspan="2">Q12</th>
-      <th colspan="2">Q13</th>
-      <th colspan="2">Q14</th>
-      <th colspan="2">Q15</th>
-      <th colspan="2">Q16</th>
-      <th colspan="2">Q17</th>
-      <th colspan="2">Q18</th>
-      <th colspan="2">Q19</th>
-      <th colspan="2">Q20</th>
-      <th colspan="2">Q21</th>
-      <th colspan="2">Q22</th>
-      <th colspan="2">Q23</th>
-      <th colspan="2">Q24</th>
-      <th colspan="2">Q25</th>
-      <th colspan="2">Q26</th>
-      <th colspan="2">Q27</th>
-      <th colspan="2">Q28</th>
-      <th colspan="2">Q29</th>
-      <th colspan="2">Q30</th>
-      <th colspan="2">Q31</th>
-      <th colspan="2">Q32</th>
-      <th colspan="2">Q33</th>
-      <th colspan="2">Q34</th>
-      <th colspan="2">Q35</th>
-      <th colspan="2">Q36</th>
-      <th colspan="2">Q37</th>
-      <th colspan="2">Q38</th>
-      <th colspan="2">Q39</th>
-      <th colspan="2">Q40</th>
-      <th colspan="2">Q41</th>
-      <th colspan="2">Q42</th>
-      <th colspan="2">Q43</th>
-      <th colspan="2">Q44</th>
-      <th colspan="2">Q45</th>
-      <th colspan="2">Q46</th>
-      <th colspan="2">Q47</th>
-      <th colspan="2">Q48</th>
-      <th colspan="2">Q49</th>
-      <th rowspan="2">Total Correct</th>
-    </tr>
-    <tr>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-      <th>Answer</th><th>Time</th>
-    </tr>
-      </thead>
-    <tbody>
-{% for row in rows %}
+<thead>
   <tr>
-      <td>{{ row.user.abbreviation }}</td>
-      {% for result in row.results %}
-          {% if result %}
-  <td class="{% if result.is_correct %}correct{% else %}wrong{% endif %}">
-    {% if result.is_correct %}1{% else %}0{% endif %}
-  </td>
-  <td>{{ result.response_time }}ms</td>
-{% else %}
-  <td>-</td><td>-</td>
-{% endif %}
-      {% endfor %}
-      <td>{{ row.total_correct }}</td>
+    <th rowspan="2">Controller Name</th>
+    {% for label in labels %}
+      <th colspan="2">{{ label }}</th>
+    {% endfor %}
+    <th rowspan="2">Total Correct</th>
   </tr>
-{% endfor %}
+  <tr>
+    {% for label in labels %}
+      <th>Answer</th>
+      <th>Time</th>
+    {% endfor %}
+  </tr>
+</thead>
+
+<tbody>
+  {% for row in rows %}
+    <tr>
+      <td>{{ row.user.abbreviation }}</td>
+
+      {% for result in row.flattened_results %}
+        {% if result.is_correct is not None %}
+          <td class="{% if result.is_correct %}correct{% else %}wrong{% endif %}">
+            {% if result.is_correct %}1{% else %}0{% endif %}
+          </td>
+          <td>{{ result.response_time }}ms</td>
+        {% else %}
+          <td>-</td>
+          <td>-</td>
+        {% endif %}
+      {% endfor %}
+
+      <td>{{ row.total_correct }}</td>
+    </tr>
+  {% endfor %}
 </tbody>
+
 
     </table>
   </div>
