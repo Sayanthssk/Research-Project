@@ -495,12 +495,12 @@ from collections import defaultdict
 from .models import PostResult, PostQuestion
 
 class PostAppeared(View):
+
     def get(self, request):
         results = PostResult.objects.filter(USERID__LOGINID__usertype='patient').select_related('USERID', 'QUESTIONID')
         questions = list(PostQuestion.objects.order_by('id'))
 
         user_results = defaultdict(lambda: [None] * len(questions))
-
         question_id_index = {q.id: idx for idx, q in enumerate(questions)}
 
         for res in results:
@@ -517,7 +517,20 @@ class PostAppeared(View):
                 'total_correct': total_correct
             })
 
-        return render(request, 'Postappearedpatients.html', {'rows': rows, 'questions': questions})
+        # --- New: Label categories like Happy1, Happy2, etc ---
+        category_count = defaultdict(int)
+        labeled_questions = []
+
+        for q in questions:
+            category_count[q.category] += 1
+            label = f"{q.category}{category_count[q.category]}"
+            labeled_questions.append({'question': q, 'label': label})
+
+        return render(request, 'Postappearedpatients.html', {
+            'rows': rows,
+            'questions': labeled_questions,
+        })
+
 
 
 
@@ -553,12 +566,11 @@ class ControllerPostorSpont(View):
         return render(request, 'postorspontcont.html')
     
 class PostAppearedController(View):
-    def get(self, request):
+   def get(self, request):
         results = PostResult.objects.filter(USERID__LOGINID__usertype='controller').select_related('USERID', 'QUESTIONID')
         questions = list(PostQuestion.objects.order_by('id'))
 
         user_results = defaultdict(lambda: [None] * len(questions))
-
         question_id_index = {q.id: idx for idx, q in enumerate(questions)}
 
         for res in results:
@@ -575,7 +587,19 @@ class PostAppearedController(View):
                 'total_correct': total_correct
             })
 
-        return render(request, 'postappeardcontroller.html', {'rows': rows, 'questions': questions})
+        # 🆕 Label questions using category counts like Happy1, Happy2
+        category_count = defaultdict(int)
+        labeled_questions = []
+
+        for q in questions:
+            category_count[q.category] += 1
+            label = f"{q.category}{category_count[q.category]}"
+            labeled_questions.append({'question': q, 'label': label})
+
+        return render(request, 'postappeardcontroller.html', {
+            'rows': rows,
+            'questions': labeled_questions
+        })
     
 
 class ControllerPostorSpontuser(View):

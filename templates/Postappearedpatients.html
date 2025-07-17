@@ -70,20 +70,21 @@
 
   <div class="table-container">
     <table id="statusTable">
-      <thead>
-        <tr>
-          <th rowspan="2">Patient Name</th>
-          {% for q in questions %}
-            <th colspan="2">Q{{ forloop.counter }}</th>
-          {% endfor %}
-          <th rowspan="2">Total Correct</th>
-        </tr>
-        <tr>
-          {% for q in questions %}
-            <th>Answer</th><th>Time</th>
-          {% endfor %}
-        </tr>
-      </thead>
+<thead>
+  <tr>
+    <th rowspan="2">Patient Name</th>
+    {% for q in questions %}
+      <th colspan="2">{{ q.label }}</th>
+    {% endfor %}
+    <th rowspan="2">Total Correct</th>
+  </tr>
+  <tr>
+    {% for q in questions %}
+      <th>Answer</th><th>Time</th>
+    {% endfor %}
+  </tr>
+</thead>
+
       <tbody>
         {% for row in rows %}
         <tr>
