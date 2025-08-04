@@ -62,3 +62,7 @@ class PostResult(models.Model):
     is_correct = models.BooleanField(default=False)
     # total_score = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+class DemoQuestion(models.Model):
+    image = models.ImageField(upload_to='Demo_question_images/', help_text="Upload image for the question.")
+    created_at = models.DateTimeField(auto_now_add=True)

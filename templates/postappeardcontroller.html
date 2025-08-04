@@ -66,7 +66,7 @@
 </head>
 <body>
 
-  <h1>Attended Patient - Post Expression Question Status with Response Time</h1>
+  <h1>Attended Patient - Pose Expression Question Status with Response Time</h1>
 
   <div class="table-container">
     <table id="statusTable">
@@ -112,7 +112,7 @@
     function downloadExcel() {
       const table = document.getElementById("statusTable");
       const workbook = XLSX.utils.table_to_book(table, { sheet: "UserStatus" });
-      XLSX.writeFile(workbook, "Controller_Post.xlsx");
+      XLSX.writeFile(workbook, "Controller_Pose.xlsx");
     }
   </script>
 

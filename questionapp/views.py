@@ -417,12 +417,46 @@ from django.utils.decorators import method_decorator
 @method_decorator(login_required, name='dispatch')
 
 
+
+
 class ShowQuestionView(View):
     def get(self, request):
-        questions = PostQuestion.objects.order_by('?')
         data = []
+
+        # First, fetch 7 demo questions
+        demo_questions = DemoQuestion.objects.order_by('?')[:7]
+
+        # Add static options to each demo question
+        for index, dq in enumerate(demo_questions):
+            demo_options = [
+                f"Anger",
+                f"Disgust",
+                f"Happy",
+                f"Sad",
+                f"Surprised",
+                f"Neutral",
+                f"Fear",
+            ]
+            random.shuffle(demo_options)
+            data.append({
+                'id': f'demo-{dq.id}',  # Mark as demo
+                'image': dq.image.url,
+                'options': demo_options
+            })
+
+        # Then fetch all real questions
+        questions = PostQuestion.objects.order_by('?')
+
         for q in questions:
-            options = [q.category, q.option1, q.option2, q.option3, q.option4, q.option5, q.option6]  # category is assumed to be correct
+            options = [
+                q.category,  # assumed correct
+                q.option1,
+                q.option2,
+                q.option3,
+                q.option4,
+                q.option5,
+                q.option6
+            ]
             random.shuffle(options)
             data.append({
                 'id': q.id,
@@ -432,11 +466,9 @@ class ShowQuestionView(View):
 
         # Get Login ID from session
         login_id = request.session.get('user_id')
-
         if not login_id:
             return redirect('login')  # or show error
 
-        # Now get the User_Model with this LOGINID
         try:
             user_model = User_Model.objects.get(LOGINID_id=login_id)
         except User_Model.DoesNotExist:
@@ -446,6 +478,7 @@ class ShowQuestionView(View):
             'data': data,
             'user_id': user_model.id
         })
+
 
 
     
@@ -463,8 +496,14 @@ def submit_result(request):
         data = json.loads(request.body)
 
         try:
+            question_id = data['QUESTIONID']
+
+            # Skip saving if it's a demo question (e.g., id starts with "demo-")
+            if str(question_id).startswith('demo-'):
+                return JsonResponse({'status': 'skipped_demo'})
+
             user = User_Model.objects.get(id=data['USERID'])
-            question = PostQuestion.objects.get(id=data['QUESTIONID'])
+            question = PostQuestion.objects.get(id=question_id)
             selected_answer = data['selected_answer']
             response_time = float(data['response_time'])
 
@@ -479,6 +518,7 @@ def submit_result(request):
             result.save()
 
             return JsonResponse({'status': 'success'})
+
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
@@ -644,6 +684,13 @@ class SpontaniousQuestionView(View):
                 )
             )
 
+        def derangement(original):
+            while True:
+                shuffled = original[:]
+                random.shuffle(shuffled)
+                if all(o != s for o, s in zip(original, shuffled)):
+                    return shuffled
+
         # Step 1: Get Login ID from session
         login_id = request.session.get('user_id')
         if not login_id:
@@ -655,7 +702,27 @@ class SpontaniousQuestionView(View):
         except User_Model.DoesNotExist:
             return HttpResponse("User profile not found", status=404)
 
-        # Step 3: Fetch question groups
+        # Step 3: Fetch 7 demo questions
+        demo_questions = DemoQuestion.objects.order_by('?')[:7]
+        demo_data = []
+        for index, dq in enumerate(demo_questions):
+            base_options = [
+                f"Sadness",
+                f"Disgust",
+                f"Happiness",
+                f"Surprised",
+                f"Neutral",
+            ]
+            shuffled_options = derangement(base_options)
+
+            demo_data.append({
+                "id": f"demo-{dq.id}",
+                "image": dq.image.url,
+                "options": shuffled_options,
+                "is_demo": True
+            })
+
+        # Step 4: Fetch actual spontaneous questions grouped by category
         groups = [
             fetch_random("Without Occlusion", "High Intensity"),
             fetch_random("Without Occlusion", "Medium Intensity"),
@@ -670,19 +737,22 @@ class SpontaniousQuestionView(View):
 
         all_questions = sum(groups, [])
 
-        data = [
+        real_data = [
             {
                 "id": q.id,
                 "image": q.image.url,
                 "options": [q.category, q.option1, q.option2, q.option3, q.option4],
-                "answer": q.category
+                "answer": q.category,
+                "is_demo": False
             }
             for q in all_questions
         ]
 
+        data = demo_data + real_data
+
         return render(request, 'Controller/spontaniousquestion.html', {
             'data': data,
-            'user_id': user_model.id  # Correct USER ID from User_Model
+            'user_id': user_model.id
         })
 
 
@@ -700,12 +770,16 @@ class SubmitSpontaniousResultView(View):
             if not all([user_id, question_id, selected, response_time]):
                 return JsonResponse({'status': 'error', 'message': 'Missing fields'}, status=400)
 
+            # Skip saving demo question results
+            if str(question_id).startswith('demo-'):
+                return JsonResponse({'status': 'skipped_demo'})
+
             question = SpontaniousQuestion.objects.get(id=question_id)
             user = User_Model.objects.get(id=user_id)
 
             is_correct = (selected == question.category)
 
-            result = SpontaniousResult.objects.create(
+            SpontaniousResult.objects.create(
                 USERID=user,
                 QUESTIONID=question,
                 response_time=response_time,
