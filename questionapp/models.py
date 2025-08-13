@@ -65,4 +65,19 @@ class PostResult(models.Model):
 
 class DemoQuestion(models.Model):
     image = models.ImageField(upload_to='Demo_question_images/', help_text="Upload image for the question.")
+    category = models.CharField(max_length=100, help_text="This is the correct answer / category.")
+    option1 = models.CharField(max_length=100, help_text="Wrong option 1", null=True, blank=True)
+    option2 = models.CharField(max_length=100, help_text="Wrong option 2", null=True, blank=True)
+    option3 = models.CharField(max_length=100, help_text="Wrong option 3", null=True, blank=True)
+    option4 = models.CharField(max_length=100, help_text="Wrong option 3", null=True, blank=True)
+    option5 = models.CharField(max_length=100, help_text="Wrong option 3", null=True, blank=True)
+    option6 = models.CharField(max_length=100, help_text="Wrong option 4", null=True, blank=True, default='Neutral')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class DemoResult(models.Model):
+    USERID = models.ForeignKey(User_Model, on_delete=models.CASCADE, null=True, blank=True)
+    QUESTIONID = models.ForeignKey(DemoQuestion, on_delete=models.CASCADE, null=True, blank=True)
+    response_time = models.FloatField(null=True, blank=True)
+    is_correct = models.BooleanField(default=False)
+    # total_score = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

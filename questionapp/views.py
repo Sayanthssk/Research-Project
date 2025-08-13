@@ -426,17 +426,19 @@ class ShowQuestionView(View):
         # First, fetch 7 demo questions
         demo_questions = DemoQuestion.objects.order_by('?')[:7]
 
-        # Add static options to each demo question
-        for index, dq in enumerate(demo_questions):
+        # Add DB-stored options for each demo question
+        for dq in demo_questions:
             demo_options = [
-                f"Anger",
-                f"Disgust",
-                f"Happy",
-                f"Sad",
-                f"Surprised",
-                f"Neutral",
-                f"Fear",
+                dq.category,  # assumed correct
+                dq.option1,
+                dq.option2,
+                dq.option3,
+                dq.option4,
+                dq.option5,
+                dq.option6
             ]
+            # Remove any None values if some options are blank
+            demo_options = [opt for opt in demo_options if opt]
             random.shuffle(demo_options)
             data.append({
                 'id': f'demo-{dq.id}',  # Mark as demo
@@ -457,6 +459,7 @@ class ShowQuestionView(View):
                 q.option5,
                 q.option6
             ]
+            options = [opt for opt in options if opt]
             random.shuffle(options)
             data.append({
                 'id': q.id,
@@ -467,7 +470,7 @@ class ShowQuestionView(View):
         # Get Login ID from session
         login_id = request.session.get('user_id')
         if not login_id:
-            return redirect('login')  # or show error
+            return redirect('login')  
 
         try:
             user_model = User_Model.objects.get(LOGINID_id=login_id)
@@ -478,6 +481,7 @@ class ShowQuestionView(View):
             'data': data,
             'user_id': user_model.id
         })
+
 
 
 
@@ -497,16 +501,30 @@ def submit_result(request):
 
         try:
             question_id = data['QUESTIONID']
-
-            # Skip saving if it's a demo question (e.g., id starts with "demo-")
-            if str(question_id).startswith('demo-'):
-                return JsonResponse({'status': 'skipped_demo'})
-
             user = User_Model.objects.get(id=data['USERID'])
-            question = PostQuestion.objects.get(id=question_id)
             selected_answer = data['selected_answer']
             response_time = float(data['response_time'])
 
+            # Check if it's a demo question
+            if str(question_id).startswith('demo-'):
+                # Remove the "demo-" prefix to get actual ID
+                demo_id = str(question_id).replace('demo-', '')
+                demo_question = DemoQuestion.objects.get(id=demo_id)
+
+                is_correct = (selected_answer == demo_question.category)
+
+                demo_result = DemoResult(
+                    USERID=user,
+                    QUESTIONID=demo_question,
+                    response_time=response_time,
+                    is_correct=is_correct
+                )
+                demo_result.save()
+
+                return JsonResponse({'status': 'success', 'type': 'demo'})
+
+            # If not a demo question, save in PostResult
+            question = PostQuestion.objects.get(id=question_id)
             is_correct = (selected_answer == question.category)
 
             result = PostResult(
@@ -517,7 +535,7 @@ def submit_result(request):
             )
             result.save()
 
-            return JsonResponse({'status': 'success'})
+            return JsonResponse({'status': 'success', 'type': 'real'})
 
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
@@ -534,46 +552,127 @@ from django.views import View
 from collections import defaultdict
 from .models import PostResult, PostQuestion
 
+# class PostAppeared(View):
+
+#     def get(self, request):
+#         results = PostResult.objects.filter(USERID__LOGINID__usertype='patient').select_related('USERID', 'QUESTIONID')
+#         questions = list(PostQuestion.objects.order_by('id'))
+
+#         user_results = defaultdict(lambda: [None] * len(questions))
+#         question_id_index = {q.id: idx for idx, q in enumerate(questions)}
+
+#         for res in results:
+#             idx = question_id_index.get(res.QUESTIONID.id)
+#             if idx is not None:
+#                 user_results[res.USERID][idx] = res
+
+#         rows = []
+#         for user, answers in user_results.items():
+#             total_correct = sum(1 for r in answers if r and r.is_correct)
+#             rows.append({
+#                 'user': user,
+#                 'results': answers,
+#                 'total_correct': total_correct
+#             })
+
+#         # --- New: Label categories like Happy1, Happy2, etc ---
+#         category_count = defaultdict(int)
+#         labeled_questions = []
+
+#         for q in questions:
+#             category_count[q.category] += 1
+#             label = f"{q.category}{category_count[q.category]}"
+#             labeled_questions.append({'question': q, 'label': label})
+
+#         return render(request, 'Postappearedpatients.html', {
+#             'rows': rows,
+#             'questions': labeled_questions,
+#         })
+
+
+
+
+from collections import defaultdict
+from django.views import View
+from django.shortcuts import render
+
 class PostAppeared(View):
-
     def get(self, request):
-        results = PostResult.objects.filter(USERID__LOGINID__usertype='patient').select_related('USERID', 'QUESTIONID')
-        questions = list(PostQuestion.objects.order_by('id'))
+        # ======================
+        # 1) POST RESULTS
+        # ======================
+        post_results = PostResult.objects.filter(
+            USERID__LOGINID__usertype='patient'
+        ).select_related('USERID', 'QUESTIONID')
 
-        user_results = defaultdict(lambda: [None] * len(questions))
-        question_id_index = {q.id: idx for idx, q in enumerate(questions)}
+        post_questions = list(PostQuestion.objects.order_by('id'))
+        post_q_index = {q.id: idx for idx, q in enumerate(post_questions)}
+        post_user_results = defaultdict(lambda: [None] * len(post_questions))
 
-        for res in results:
-            idx = question_id_index.get(res.QUESTIONID.id)
+        for res in post_results:
+            idx = post_q_index.get(res.QUESTIONID.id)
             if idx is not None:
-                user_results[res.USERID][idx] = res
+                post_user_results[res.USERID][idx] = res
 
-        rows = []
-        for user, answers in user_results.items():
+        post_rows = []
+        for user, answers in post_user_results.items():
             total_correct = sum(1 for r in answers if r and r.is_correct)
-            rows.append({
+            post_rows.append({
                 'user': user,
                 'results': answers,
                 'total_correct': total_correct
             })
 
-        # --- New: Label categories like Happy1, Happy2, etc ---
-        category_count = defaultdict(int)
-        labeled_questions = []
+        post_category_count = defaultdict(int)
+        post_labeled_questions = []
+        for q in post_questions:
+            post_category_count[q.category] += 1
+            label = f"{q.category}{post_category_count[q.category]}"
+            post_labeled_questions.append({'question': q, 'label': label})
 
-        for q in questions:
-            category_count[q.category] += 1
-            label = f"{q.category}{category_count[q.category]}"
-            labeled_questions.append({'question': q, 'label': label})
+        # ======================
+        # 2) DEMO RESULTS
+        # ======================
+        demo_results = DemoResult.objects.filter(
+            USERID__LOGINID__usertype='patient'
+        ).select_related('USERID', 'QUESTIONID')
 
+        demo_questions = list(DemoQuestion.objects.order_by('id'))
+        demo_q_index = {q.id: idx for idx, q in enumerate(demo_questions)}
+        demo_user_results = defaultdict(lambda: [None] * len(demo_questions))
+
+        for res in demo_results:
+            idx = demo_q_index.get(res.QUESTIONID.id)
+            if idx is not None:
+                demo_user_results[res.USERID][idx] = res
+
+        demo_rows = []
+        for user, answers in demo_user_results.items():
+            total_correct = sum(1 for r in answers if r and r.is_correct)
+            demo_rows.append({
+                'user': user,
+                'results': answers,
+                'total_correct': total_correct
+            })
+
+        demo_category_count = defaultdict(int)
+        demo_labeled_questions = []
+        for q in demo_questions:
+            demo_category_count[q.category] += 1
+            label = f"{q.category}{demo_category_count[q.category]}"
+            demo_labeled_questions.append({'question': q, 'label': label})
+
+        # ======================
+        # 3) RENDER BOTH TABLES
+        # ======================
         return render(request, 'Postappearedpatients.html', {
-            'rows': rows,
-            'questions': labeled_questions,
+            # post table
+            'rows': post_rows,
+            'questions': post_labeled_questions,
+            # demo table
+            'demo_rows': demo_rows,
+            'demo_questions': demo_labeled_questions,
         })
-
-
-
-
 
     
 
@@ -652,26 +751,26 @@ class Spontaneousinstruction(View):
         return render(request, 'Controller/spontaneousinstruction.html', {'c': c})
     
 
-from django.views import View
-from django.shortcuts import render
-from django.http import JsonResponse
-from .models import SpontaniousQuestion, SpontaniousResult, User_Model
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-import json
+# from django.views import View
+# from django.shortcuts import render
+# from django.http import JsonResponse
+# from .models import SpontaniousQuestion, SpontaniousResult, User_Model
+# from django.views.decorators.csrf import csrf_exempt
+# from django.utils.decorators import method_decorator
+# import json
 
-import random
-from django.views import View
-from django.shortcuts import render
-from .models import SpontaniousQuestion
+# import random
+# from django.views import View
+# from django.shortcuts import render
+# from .models import SpontaniousQuestion
 
-from django.views import View
-from django.shortcuts import render, HttpResponse
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-from .models import SpontaniousQuestion, SpontaniousResult, User_Model
-import random, json
+# from django.views import View
+# from django.shortcuts import render, HttpResponse
+# from django.http import JsonResponse
+# from django.views.decorators.csrf import csrf_exempt
+# from django.utils.decorators import method_decorator
+# from .models import SpontaniousQuestion, SpontaniousResult, User_Model
+# import random, json
 
 
 class SpontaniousQuestionView(View):
@@ -684,13 +783,6 @@ class SpontaniousQuestionView(View):
                 )
             )
 
-        def derangement(original):
-            while True:
-                shuffled = original[:]
-                random.shuffle(shuffled)
-                if all(o != s for o, s in zip(original, shuffled)):
-                    return shuffled
-
         # Step 1: Get Login ID from session
         login_id = request.session.get('user_id')
         if not login_id:
@@ -702,27 +794,7 @@ class SpontaniousQuestionView(View):
         except User_Model.DoesNotExist:
             return HttpResponse("User profile not found", status=404)
 
-        # Step 3: Fetch 7 demo questions
-        demo_questions = DemoQuestion.objects.order_by('?')[:7]
-        demo_data = []
-        for index, dq in enumerate(demo_questions):
-            base_options = [
-                f"Sadness",
-                f"Disgust",
-                f"Happiness",
-                f"Surprised",
-                f"Neutral",
-            ]
-            shuffled_options = derangement(base_options)
-
-            demo_data.append({
-                "id": f"demo-{dq.id}",
-                "image": dq.image.url,
-                "options": shuffled_options,
-                "is_demo": True
-            })
-
-        # Step 4: Fetch actual spontaneous questions grouped by category
+        # Step 3: Fetch question groups
         groups = [
             fetch_random("Without Occlusion", "High Intensity"),
             fetch_random("Without Occlusion", "Medium Intensity"),
@@ -737,23 +809,21 @@ class SpontaniousQuestionView(View):
 
         all_questions = sum(groups, [])
 
-        real_data = [
+        data = [
             {
                 "id": q.id,
                 "image": q.image.url,
                 "options": [q.category, q.option1, q.option2, q.option3, q.option4],
-                "answer": q.category,
-                "is_demo": False
+                "answer": q.category
             }
             for q in all_questions
         ]
 
-        data = demo_data + real_data
-
         return render(request, 'Controller/spontaniousquestion.html', {
             'data': data,
-            'user_id': user_model.id
+            'user_id': user_model.id  # Correct USER ID from User_Model
         })
+
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -770,16 +840,12 @@ class SubmitSpontaniousResultView(View):
             if not all([user_id, question_id, selected, response_time]):
                 return JsonResponse({'status': 'error', 'message': 'Missing fields'}, status=400)
 
-            # Skip saving demo question results
-            if str(question_id).startswith('demo-'):
-                return JsonResponse({'status': 'skipped_demo'})
-
             question = SpontaniousQuestion.objects.get(id=question_id)
             user = User_Model.objects.get(id=user_id)
 
             is_correct = (selected == question.category)
 
-            SpontaniousResult.objects.create(
+            result = SpontaniousResult.objects.create(
                 USERID=user,
                 QUESTIONID=question,
                 response_time=response_time,
@@ -790,5 +856,3 @@ class SubmitSpontaniousResultView(View):
 
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-
-
